@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Learn about the University Service Request System." />
+    <title>About | University Service Request System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Lora:wght@500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../src/css/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="site-header"><div class="shell header-inner">
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">USRS</span><span class="brand-text"><span class="brand-name">University Service Request System</span><span class="brand-sub">Office of Student Services</span></span></a>
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="primaryNav"><span class="nav-toggle-bars" aria-hidden="true"></span><span class="nav-toggle-label">Menu</span></button>
+      <nav class="primary-nav" id="primaryNav" aria-label="Main"><ul><li><a href="../index.html">Home</a></li><li><a href="./about.html">About</a></li><li><a href="./services.html">Services</a></li><li><a href="./request.html">Request a service</a></li><li><a href="./contact.html">Contact</a></li></ul></nav>
+    </div></header>
+    <main id="main">
+      <section class="hero hero-page"><div class="shell"><p class="hero-kicker">About the portal</p><h1>One clear route to the office that can help.</h1><p class="hero-lead">USRS replaces scattered paper slips, inboxes and personal messages with one structured student service experience.</p></div></section>
+      <section class="section section-about" aria-labelledby="about-title"><div class="shell about-grid">
+        <div class="section-head"><h2 id="about-title">About the system</h2><p>USRS is a student service request portal built for a university front office. It gives students one place to find services, send the right details and understand where their request goes.</p></div>
+        <figure class="about-figure"><img src="../src/assets/images/request-flow.svg" alt="A student sends one request, which travels to the service office that handles it" width="640" height="380" /><figcaption>One request, one record, one office responsible for it.</figcaption></figure>
+        <div class="about-body"><article><h3>Why it was developed</h3><p>Service requests reach offices through too many channels, so a request can be lost between a desk, an inbox and a phone. USRS collects every request in one form with the details the handling office needs.</p></article><article><h3>What students get</h3><p>Students can send a request outside office hours, from a phone, without travelling to campus. The form asks for essential information up front.</p></article><article><h3>What the university gets</h3><p>Requests arrive sorted by category and routed to one office. Each request becomes a record that can support workload and turnaround tracking.</p></article><article><h3>Scope of this version</h3><p>This is the Week 1-3 build of a progressive coursework project: the interface, responsive layout and client-side JavaScript. Stored requests and an office dashboard are planned for later weeks.</p></article></div>
+      </div></section>
+    </main>
+    <footer class="site-footer"><div class="shell footer-grid"><div class="footer-brand"><p class="footer-name">University Service Request System</p><p>A student-facing portal for university services.</p></div><nav class="footer-nav" aria-label="Footer"><h2>Sections</h2><ul><li><a href="../index.html">Home</a></li><li><a href="./about.html">About</a></li><li><a href="./services.html">Services</a></li><li><a href="./request.html">Request a service</a></li><li><a href="./contact.html">Contact</a></li></ul></nav><div class="footer-meta"><h2>Coursework</h2><p>BSE 4103 - Advanced Internet Programming</p></div></div><div class="shell footer-bottom"><p>Built for coursework. Not a live university service.</p><p><span id="currentYear"></span> University Service Request System</p></div></footer>
+    <script type="module" src="../src/js/main.js"></script>
+  </body>
+</html>
