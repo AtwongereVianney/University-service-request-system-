@@ -7,21 +7,21 @@
 
 /* ---------- Design tokens ---------- */
 :root {
-  --ink: #16241d;
-  --ink-soft: #4a5a52;
-  --green: #1d5c43;
-  --green-deep: #123a2b;
-  --gold: #a5801f;
-  --paper: #f3f6f3;
+  --ink: #183229;
+  --ink-soft: #52665c;
+  --green: #006b3f;
+  --green-deep: #004d2d;
+  --gold: #d5a928;
+  --paper: #f4f7f1;
   --surface: #ffffff;
-  --line: #d6e0d9;
+  --line: #d5e0d6;
 
   --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
   --font-display: "Lora", Georgia, "Times New Roman", serif;
 
   --shell: 1120px;
-  --radius: 10px;
-  --radius-sm: 6px;
+  --radius: 4px;
+  --radius-sm: 2px;
 }
 
 /* ---------- Reset ---------- */
