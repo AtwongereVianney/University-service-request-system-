@@ -295,16 +295,34 @@ university API in Weeks 1–3.
 
 ## 7. Features added in Week 3
 
-- JavaScript split into ES6 modules: `main.js`, `navigation.js`, `requestForm.js`,
-  `announcements.js`, `services.js`
-- **Latest service information** section on the home page, filled at runtime from a
-  public REST API using `fetch()` and `async/await`
+- JavaScript split into ES6 modules: `main.js`, `navigation.js`, `requestForm.js`, `announcements.js`, `services.js`
+- **Latest service information** section on the home page, filled at runtime from a public REST API using `fetch()` and `async/await`
 - Four interface states for that section: loading, success, empty response and failure
 - "Reload notices" and "Try again" controls that re-run the request
 - Service card buttons that pre-select the category and move the student to the form
-- Form submission that builds a request object and renders a summary with a
-  generated reference number (no storage yet — that is a later week)
+- Form submission that builds a request object and renders a summary with a generated reference number (no storage yet — that is a later week)
 - Responsive navigation behaviour with `aria-expanded` kept in step
+
+### Week 3 requirement evidence
+
+The Week 3 JavaScript requirement is implemented in the application, not only shown in the developer console. The code and its role are mapped below:
+
+| Requirement | Where it is used | What it does |
+|---|---|---|
+| `let` and `const` | `src/js/announcements.js`, `src/js/requestForm.js`, and the other modules | `const` holds values that are not reassigned; `toHeadline()` uses `let headline` because it replaces an overlong headline with a shortened version. |
+| Arrow functions | `src/js/announcements.js`, `src/js/requestForm.js`, `src/js/services.js` | Define data transformation functions and event handlers. |
+| Template literals | `noticeTemplate()` in `src/js/announcements.js`; `summaryTemplate()` and `createReference()` in `src/js/requestForm.js` | Build the notice HTML, request summary HTML, and reference strings. |
+| Destructuring | `toServiceNotice()` and `noticeTemplate()` in `src/js/announcements.js`; form and category handling in `src/js/requestForm.js` | Pull fields such as `id`, `title`, `body`, and the selected service from objects. |
+| Spread and rest | `buildNotices()` in `src/js/announcements.js`; `collectFormValues()` and `findEmptyFields()` in `src/js/requestForm.js` | Copy arrays and objects, combine submission data, and accept a variable list of required fields. |
+| `async` / `await` and Fetch API | `fetchServiceData()` and `loadServiceUpdates()` in `src/js/announcements.js` | Request remote data, wait for the response, and pass results into the page renderer. |
+| Public REST API and JSON | `src/js/announcements.js` | Fetches `https://jsonplaceholder.typicode.com/posts` and parses the response with `response.json()`. The first six records are reshaped as demonstration notices. |
+| Visible page output | `pages/updates.html` and `renderServiceData()` in `src/js/announcements.js` | Inserts notice cards into `#updatesGrid` and updates the accessible status message in `#updatesStatus`. |
+| Loading and error handling | `showLoading()`, `showError()`, and `loadServiceUpdates()` in `src/js/announcements.js` | Shows a loading message, handles empty results, and shows a friendly failure message with a Try again button for network or HTTP errors. |
+
+The notices are demonstration content derived from JSONPlaceholder, not live
+announcements from the university. Open **View updates** from the homepage to see
+the rendered API data. **Reload notices** retries the request; if the request
+fails, **Try again** is shown with the user-friendly error message.
 
 ## 8. Project structure
 

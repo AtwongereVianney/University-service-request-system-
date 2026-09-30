@@ -65,8 +65,11 @@ export async function fetchServiceData(url = API_URL) {
 /** Turn "qui est esse" into "Qui est esse" and trim runaway length. */
 const toHeadline = (text = '', maxLength = 64) => {
   const cleaned = text.replace(/\s+/g, ' ').trim();
-  const headline = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
-  return headline.length > maxLength ? `${headline.slice(0, maxLength).trimEnd()}…` : headline;
+  let headline = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+  if (headline.length > maxLength) {
+    headline = `${headline.slice(0, maxLength).trimEnd()}…`;
+  }
+  return headline;
 };
 
 /**
