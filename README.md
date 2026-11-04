@@ -5,7 +5,8 @@ university offers and submit a service request online, instead of queuing at the
 front desk or sending requests through informal channels.
 
 Built for **BSE 4103 – Advanced Internet Programming**, progressive individual
-practical coursework. This repository currently contains the **Weeks 1–3** build.
+practical coursework. The current version includes the student-facing frontend,
+PHP API and MySQL persistence.
 
 ---
 
@@ -28,9 +29,9 @@ office actually needs, in a form students can reach from a phone at any hour.
 1. Present the university's services in one catalogue students can browse.
 2. Provide a single structured request form that routes to the correct office.
 3. Work properly on a phone, a tablet and a desktop.
-4. Show live service information fetched from a public REST API.
-5. Stay structured so later weeks can add validation, a backend, a database,
-   authentication and an administrative dashboard without a rebuild.
+4. Show service announcements stored in MySQL.
+5. Save student requests and provide a reference number for follow-up.
+6. Keep the frontend, API, database connection and repositories in separate layers.
 
 ## 3. Technologies used
 
@@ -40,12 +41,13 @@ office actually needs, in a form students can reach from a phone at any hour.
 | Styling | CSS3 — custom properties, Flexbox, CSS Grid, media queries |
 | Behaviour | Vanilla JavaScript, ES6+ modules |
 | Build tool / dev server | Vite |
+| Backend | PHP 7.4+ with PDO |
+| Database | MySQL or MariaDB |
 | Package manager | npm |
 | Version control | Git and GitHub |
-| External data | JSONPlaceholder public REST API |
 
-No framework, no backend and no database are used at this stage — those belong to
-later weeks of the coursework.
+The PHP API uses prepared PDO statements and reads database credentials from
+environment variables or a local, ignored `.env` file.
 
 ## 4. Step-by-step explanation of how I built the system
 
@@ -74,8 +76,9 @@ I created the project as an npm project and used Vite as the development server
 and build tool. In `package.json`, I added the `dev`, `build` and `preview` scripts
 and declared the project as an ES module project using `"type": "module"`.
 
-I also created `vite.config.js` and set a relative base path so the built files can
-work when deployed as a static site. I added `.gitignore` so generated files such
+I also created `vite.config.js` and set a relative base path for flexible asset
+paths. It also proxies `/api` requests to the local PHP server during development.
+I added `.gitignore` so generated files such
 as `node_modules` and `dist` are not committed. I installed the dependencies with
 `npm install` and checked the project continuously with `npm run dev`.
 
@@ -111,8 +114,8 @@ correctly to screen readers.
 
 I listed nine realistic university services, including transcript requests,
 clearance, letters, hostel support, IT support, examination issues, registration,
-finance inquiries and general student services. Each service displays its name,
-description and responsible office.
+finance inquiries and general student services. Each service displays its name, description and responsible office, loaded from
+the database.
 
 The request form collects the information that an office needs to understand a
 request: full name, registration number, email, phone number, category, subject
@@ -179,29 +182,22 @@ collect the values using `FormData` and `Object.fromEntries`. I check that the
 required fields contain values. If a required field is empty, the page displays a
 message telling the student to complete the form.
 
-If the fields are complete, I look up the selected category and responsible office,
-create a reference such as `USRS-2026-4821`, and render a summary containing the
-student, email, service, office, subject and time prepared. The form is then reset.
-At this stage the request is only held in the browser and is not saved to a
-database; database storage is part of the planned backend stage.
+If the fields are complete, the form submits them to the PHP API. The server
+validates the values, looks up the selected category and responsible office in
+MySQL, saves the request, and returns a reference number and summary. The page
+displays the saved details and resets the form.
 
-### Step 11: I added live demonstration data with the Fetch API
+### Step 11: I connected services and announcements to the database
 
-For the Week 3 requirement, I added the service desk bulletin. In
-`src/js/announcements.js`, I use `fetch()` with `async/await` to request data from
-the JSONPlaceholder endpoint:
-
-`https://jsonplaceholder.typicode.com/posts`
-
-Because this is practice data rather than a university system, I transform each
-record into a demonstration service notice. I take the first six records, create a
-notice reference, assign a university service category and office, shorten the
-text where necessary, and render the results as notice cards.
+The service desk bulletin reads announcement records from the PHP API, which
+retrieves them from MySQL. The service catalogue, homepage featured services and
+request form options are loaded from the same database, keeping names and offices
+consistent.
 
 I handled the complete request lifecycle: a loading message appears while the
 request is running, successful data creates notice cards, an empty array displays
-an empty-state message, and a network or HTTP error displays an error message with
-a Try again button. The Reload notices button starts the request again.
+an empty-state message, and a network or HTTP error displays an error message. The
+Reload notices button starts the request again.
 
 ### Step 12: I created the application entry point
 
@@ -217,27 +213,20 @@ the layout at 360px, 768px, 1024px and normal laptop width, and dragged the
 responsive viewport between those sizes to find layout problems between the main
 breakpoints.
 
-I tested the navigation with the mouse and keyboard, checked the skip link and
-focus states, submitted the form with missing and complete fields, and confirmed
-that service links selected the correct category. For the API section, I checked
-the normal success response, Slow 3G loading behaviour and Offline error behaviour.
-I also used the browser Network tab to confirm the API request and response.
-
-Finally, I ran `npm run build` to check that Vite could create the production
-version, and `npm run preview` to check the built version locally.
+I tested the navigation, skip link and focus states at multiple widths. I ran PHP
+syntax checks and verified that the API returned seeded services and announcements.
+I also submitted a test request through the Vite proxy, confirmed its database row,
+and removed the temporary test row. Finally, I built the frontend with Vite.
 
 ### Step 14: I prepared the project for version control and deployment
 
 I used Git to keep a history of the work and to show the project developing in
-stages. The commits describe the setup, page structure, service catalogue, form,
-responsive design, modular JavaScript and API integration. I pushed the repository
-to GitHub and configured Netlify to run `npm run build` and publish the `dist`
-folder.
+stages. Deployment requires a PHP-capable web server and MySQL/MariaDB; the
+frontend build alone is not a complete deployment.
 
-The result is a responsive frontend prototype. It demonstrates the complete
-student-facing workflow, but it is intentionally clear about what is not yet
-implemented: there is no backend, authentication, database persistence or real
-university API in Weeks 1–3.
+The current result is a responsive student-facing application with a PHP API and
+MySQL persistence. Staff authentication, a management dashboard and a real
+university deployment are not included.
 
 ### Short explanation I can give the lecturer
 
@@ -246,14 +235,12 @@ university API in Weeks 1–3.
 > I built the semantic HTML pages for the homepage, services, request form, about
 > and contact information. I then added mobile-first CSS with Grid, Flexbox and
 > responsive breakpoints. After that I separated the JavaScript into ES6 modules
-> for navigation, shared services, the form and API notices. Service buttons pass a
-> category to the form, and the form creates a request summary with a reference
-> number. I also used `fetch()` and `async/await` to load demonstration notices from
-> JSONPlaceholder and handled loading, success, empty and error states. I tested the
-> layout at different screen sizes, tested the form and API failure states, built the
-> production version with Vite and deployed the static site. The current version is
-> a frontend prototype, so saving requests to a database is planned for the backend
-> stage.
+> for navigation, services, the form and API notices. The frontend calls PHP
+> endpoints that use PDO and MySQL for service categories, announcements and
+> submitted requests. The server validates each submission and returns a saved
+> reference number. I tested the layout, form validation, PHP syntax and Vite
+> production build. Staff login and request administration are outside the current
+> scope.
 
 ## 5. Features implemented in Week 1
 
@@ -270,7 +257,7 @@ university API in Weeks 1–3.
 - Site navigation linking Home, About, Services, Request a service and Contact
 - Professional footer
 - Runs on the Vite local development server
-- Git repository with meaningful commits, pushed to GitHub, deployed publicly
+- Git repository with meaningful commits
 
 ## 6. Features added in Week 2
 
@@ -293,17 +280,18 @@ university API in Weeks 1–3.
 - 44px minimum touch targets on buttons and form controls
 - Visible keyboard focus, a skip link, and `prefers-reduced-motion` respected
 
-## 7. Features added in Week 3
+## 7. JavaScript and backend features
 
 - JavaScript split into ES6 modules: `main.js`, `navigation.js`, `requestForm.js`, `announcements.js`, `services.js`
-- **Latest service information** section on the home page, filled at runtime from a public REST API using `fetch()` and `async/await`
+- **Latest service information** and service catalogues loaded from MySQL through PHP JSON endpoints
 - Four interface states for that section: loading, success, empty response and failure
-- "Reload notices" and "Try again" controls that re-run the request
+- "Reload notices" control that fetches the latest database-backed announcements
 - Service card buttons that pre-select the category and move the student to the form
-- Form submission that builds a request object and renders a summary with a generated reference number (no storage yet — that is a later week)
+- PHP validates and stores submitted requests; the response includes a persistent reference number
+- PDO repositories keep SQL queries separate from HTTP endpoints and validation
 - Responsive navigation behaviour with `aria-expanded` kept in step
 
-### Week 3 requirement evidence
+### JavaScript and backend implementation evidence
 
 The Week 3 JavaScript requirement is implemented in the application, not only shown in the developer console. The code and its role are mapped below:
 
@@ -311,18 +299,15 @@ The Week 3 JavaScript requirement is implemented in the application, not only sh
 |---|---|---|
 | `let` and `const` | `src/js/announcements.js`, `src/js/requestForm.js`, and the other modules | `const` holds values that are not reassigned; `toHeadline()` uses `let headline` because it replaces an overlong headline with a shortened version. |
 | Arrow functions | `src/js/announcements.js`, `src/js/requestForm.js`, `src/js/services.js` | Define data transformation functions and event handlers. |
-| Template literals | `noticeTemplate()` in `src/js/announcements.js`; `summaryTemplate()` and `createReference()` in `src/js/requestForm.js` | Build the notice HTML, request summary HTML, and reference strings. |
-| Destructuring | `toServiceNotice()` and `noticeTemplate()` in `src/js/announcements.js`; form and category handling in `src/js/requestForm.js` | Pull fields such as `id`, `title`, `body`, and the selected service from objects. |
-| Spread and rest | `buildNotices()` in `src/js/announcements.js`; `collectFormValues()` and `findEmptyFields()` in `src/js/requestForm.js` | Copy arrays and objects, combine submission data, and accept a variable list of required fields. |
-| `async` / `await` and Fetch API | `fetchServiceData()` and `loadServiceUpdates()` in `src/js/announcements.js` | Request remote data, wait for the response, and pass results into the page renderer. |
-| Public REST API and JSON | `src/js/announcements.js` | Fetches `https://jsonplaceholder.typicode.com/posts` and parses the response with `response.json()`. The first six records are reshaped as demonstration notices. |
-| Visible page output | `pages/updates.html` and `renderServiceData()` in `src/js/announcements.js` | Inserts notice cards into `#updatesGrid` and updates the accessible status message in `#updatesStatus`. |
-| Loading and error handling | `showLoading()`, `showError()`, and `loadServiceUpdates()` in `src/js/announcements.js` | Shows a loading message, handles empty results, and shows a friendly failure message with a Try again button for network or HTTP errors. |
+| Template literals | Notice and request summary renderers | Build escaped cards and the saved request summary. |
+| `async` / `await` and Fetch API | `src/js/api.js`, `src/js/requestForm.js`, `src/js/announcements.js` | Send requests to the local PHP API and handle JSON responses. |
+| PHP and PDO | `api/` | Validate input, run prepared queries and return JSON responses. |
+| MySQL | `database/schema.sql` | Store services, announcements and student requests. |
+| Visible page output | Homepage, `pages/services.html`, `pages/updates.html`, `pages/request.html` | Render database-backed services/notices and saved request references. |
+| Loading and error handling | API-driven JavaScript modules | Show loading, empty, success and failure states. |
 
-The notices are demonstration content derived from JSONPlaceholder, not live
-announcements from the university. Open **View updates** from the homepage to see
-the rendered API data. **Reload notices** retries the request; if the request
-fails, **Try again** is shown with the user-friendly error message.
+The initial announcements and service rows are coursework seed data. Update the
+database to change the notices and service catalogue displayed by the application.
 
 ## 8. Project structure
 
@@ -330,7 +315,11 @@ fails, **Try again** is shown with the user-friendly error message.
 university-service-request-system/
 ├── index.html                  # single page: header, all sections, footer
 ├── package.json                # scripts and the Vite dependency
-├── vite.config.js              # relative base path for static hosting
+├── vite.config.js              # relative build path and development API proxy
+├── api/                        # PHP JSON endpoints, configuration and repositories
+├── database/                   # MySQL schema and initialization script
+├── .env.example                # local database configuration template
+├── .env.admin.example          # local schema-initialization account template
 ├── .gitignore
 ├── README.md
 ├── docs/
@@ -341,16 +330,19 @@ university-service-request-system/
     ├── js/
     │   ├── main.js             # entry point; starts each feature
     │   ├── navigation.js       # responsive menu + footer year
-    │   ├── requestForm.js      # pre-fill, submit, summary
-    │   ├── announcements.js    # Fetch API section (Week 3)
-    │   └── services.js         # shared service catalogue data
+    │   ├── api.js              # shared PHP API client
+    │   ├── dom.js              # HTML escaping for database values
+    │   ├── requestForm.js      # submit request and show saved reference
+    │   ├── announcements.js    # MySQL-backed service notices
+    │   └── services.js         # MySQL-backed service catalogues
     └── assets/
         └── images/
 ```
 
 ## 9. Installation
 
-Requires Node.js 18 or newer and npm.
+Requires Node.js 18 or newer, npm, PHP 7.4+ with PDO MySQL enabled, and MySQL or
+MariaDB.
 
 ```bash
 git clone https://github.com/<your-username>/university-service-request-system.git
@@ -358,15 +350,44 @@ cd university-service-request-system
 npm install
 ```
 
-## 10. Running locally
+## 10. Configure MySQL and run locally
 
-```bash
-npm run dev
-```
+1. Copy both templates in PowerShell:
 
-Vite serves the application at `http://localhost:5173/`. The application is served by
-a local development web server; opening `index.html` directly from the file system is
-not supported, because the ES modules and the API request need an HTTP origin.
+   ```powershell
+   Copy-Item .env.example .env
+   Copy-Item .env.admin.example .env.admin
+   ```
+
+2. Edit `.env` with a strong, unique password for the `usrs_app` account. Edit
+   `.env.admin` with a local MySQL administrator account. The admin credentials
+   are used only by the initializer; the application connects as `usrs_app`.
+   Keep both files out of version control and never publish their contents.
+3. Initialize the database, seed the catalogues and notices, and grant the app
+   account only the permissions it needs:
+
+   ```powershell
+   php database\initialize.php
+   ```
+
+After initialization, `.env.admin` can be removed; the running application only
+needs `.env`.
+
+4. Start the PHP API server in one terminal:
+
+   ```powershell
+   php -S 127.0.0.1:8000
+   ```
+
+5. Start Vite in another terminal:
+
+   ```powershell
+   npm run dev
+   ```
+
+Vite serves the application at `http://localhost:5173/` and proxies `/api/*` to
+PHP. Keep both servers and MySQL running while using the app. The PHP endpoints
+can also be accessed directly under `http://127.0.0.1:8000/api/`.
 
 ## 11. Building and previewing the production build
 
@@ -375,27 +396,18 @@ npm run build      # writes the optimised site to dist/
 npm run preview    # serves dist/ locally so you can check the build
 ```
 
-## 12. Public deployment
+## 12. API endpoints and deployment
 
-- Platform: **Netlify** (build command `npm run build`, publish directory `dist`)
-- Public URL: `https://<your-site-name>.netlify.app`
+| Endpoint | Methods | Purpose |
+|---|---|---|
+| `/api/services.php` | `GET` | Read active services and offices from MySQL |
+| `/api/announcements.php` | `GET` | Read published service notices from MySQL |
+| `/api/contact.php` | `GET` | Read office contacts and hours from MySQL |
+| `/api/requests.php` | `POST` | Validate and save a service request |
 
-> Replace the URL above with your own deployment link before submission.
-
-## 13. REST API used in Week 3
-
-| Item | Value |
-|---|---|
-| API | JSONPlaceholder |
-| Endpoint | `https://jsonplaceholder.typicode.com/posts` |
-| Method | `GET` |
-| Auth | None |
-| Response | JSON array of records with `userId`, `id`, `title`, `body` |
-
-The records are generic practice data. Each one is mapped onto a university service
-category and rendered as a service notice card with a reference number. The page
-states on screen that these are demonstration notices generated from a public
-practice API, not real university announcements.
+The application requires a PHP/MySQL host. Static-only hosting such as GitHub
+Pages cannot run the PHP endpoints; deploy the built frontend and `api/` files
+together on a PHP-capable server configured with the application database settings.
 
 ## 14. Testing performed
 
@@ -403,29 +415,27 @@ practice API, not real university announcements.
   normal laptop resolution, plus a sweep of the responsive handle between them
 - Checked for horizontal overflow at every width
 - Keyboard-only pass: skip link, menu button, all links, every form control
-- API section tested in three conditions: normal, offline (DevTools Network →
-  Offline) to see the error state, and throttled (Slow 3G) to see the loading state
-- Network tab used to confirm the request, the 200 response and the JSON payload
+- PHP lint passed for every API and database setup script
+- GET services and announcements returned seeded MySQL records through PHP
+- POST request validation rejected incomplete data and accepted a valid test
+  request; its row was verified in MySQL and removed after testing
+- Vite development proxy and frontend rendering checked with API responses
 - `npm run build` and `npm run preview` run to confirm the production build works
 
 See `docs/WEEKLY-PROGRESS.md` for the full checklist.
 
-## 15. Future development (Weeks 4–11)
+## 15. Future development
 
 Planned, **not yet implemented**:
 
-- Week 4: detailed client-side validation and user feedback
-- Backend service and REST API for requests
-- Database storage for requests and services
 - User registration, login and password hashing
 - Token-based sessions and role-based access control
 - Administrative dashboard for service offices
 - Request status tracking and notifications
 - Security hardening and testing
 
-The current code is structured for this: presentation, behaviour and data are
-separated, each feature is its own module, and the form already collects its values
-into a single request object that a backend endpoint can receive unchanged.
+The current code keeps presentation, behaviour, API handling, persistence and
+database queries in separate files.
 
 ## 16. Author
 
@@ -433,4 +443,4 @@ Individual coursework submission for BSE 4103 — Advanced Internet Programming.
 
 ## 17. Status
 
-Weeks 1–3 complete. Weeks 4–11 pending.
+Frontend, PHP API and MySQL persistence implemented. Authentication and staff tools pending.

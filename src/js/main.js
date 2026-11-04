@@ -9,12 +9,16 @@
 import { initNavigation, setCurrentYear } from './navigation.js';
 import { initRequestForm } from './requestForm.js';
 import { initServiceUpdates } from './announcements.js';
+import { initContactInfo, initFeaturedServices, initServiceCatalog } from './services.js';
 
 const startApp = () => {
   initNavigation();
   setCurrentYear();
   initRequestForm();
-  initServiceUpdates(); // Week 3: Fetch API section
+  initServiceUpdates();
+  initFeaturedServices();
+  initServiceCatalog();
+  initContactInfo();
 };
 
 document.addEventListener('DOMContentLoaded', startApp);

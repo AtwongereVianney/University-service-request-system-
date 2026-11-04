@@ -1,6 +1,6 @@
 # USRS — weekly progression, commits and evidence
 
-One application, built up across three weeks. Nothing is restarted between weeks.
+One application, built up across four stages. Nothing is restarted between stages.
 
 ---
 
@@ -93,63 +93,51 @@ git checkout main && git merge week2-responsive
 
 ---
 
-## Week 3 — modern JavaScript and the Fetch API
+## Frontend modules and API integration
 
-**Files changed:** `src/js/main.js` (entry point), new `src/js/services.js`,
-`src/js/requestForm.js`, `src/js/announcements.js`; `index.html` gains the
-"Latest service information" section; `style.css` gains the notice card and status styles.
+The browser uses `src/js/api.js` for JSON requests to the local PHP backend.
+`services.js` loads the service catalogue for the services page, homepage and
+request form. `announcements.js` renders persisted notices on the home and
+updates pages. `requestForm.js` submits requests and displays the reference
+returned by the backend. The contact page loads its office details from MySQL.
+`dom.js` centralizes HTML escaping for database values.
 
-### Commits
-
-| # | Message | What it represents |
-|---|---|---|
-| 9 | `Split client-side logic into ES6 modules with a single entry point` | Module structure, no global variables. |
-| 10 | `Add service request form behaviour with ES6+ syntax` | Pre-fill from cards, submission summary, destructuring/spread/rest in real use. |
-| 11 | `Fetch and render service information from public REST API with loading and error states` | The Week 3 Fetch API requirement, rendered in the page. |
-
-### ES6+ feature map
-
-| Feature | Where | Why it is there |
-|---|---|---|
-| `const` / `let` | every module | `const` by default; `let` only where a value is reassigned |
-| Arrow functions | `findCategory`, `toHeadline`, event callbacks | short callbacks that keep the surrounding `this` |
-| Template literals | `noticeTemplate`, `summaryTemplate`, `createReference` | build HTML and reference strings without concatenation |
-| Destructuring | `toServiceNotice({ id, title, body, ... })`, `const { name, office } = ...`, `const { requestService } = button.dataset`, `({ key }) => ...` | name only the fields actually used |
-| Spread | `[...records]`, `{ ...entries, submittedAt }`, `{ ...rest, categoryName }` | copy instead of mutate; merge objects |
-| Rest | `...extra` in `toServiceNotice`, `...requiredFields` in `findEmptyFields` | keep unused API fields; accept any number of field names |
-| `async` / `await` | `fetchServiceData`, `loadServiceUpdates` | read the network code top to bottom |
-| Fetch API | `fetchServiceData` | the HTTP request itself |
-| ES modules | `import` / `export` across five files | one responsibility per file |
-| Optional chaining / nullish | `refreshButton?.addEventListener`, `?? fallback` | tolerate a missing element or unknown category |
-
-### Testing the API states
-
-| State | How to trigger | Expected screen |
-|---|---|---|
-| Loading | DevTools → Network → throttle to **Slow 3G**, reload | "Loading service information..." |
-| Success | Normal connection | Six notice cards with office, headline, summary, reference |
-| Failure | DevTools → Network → **Offline**, click "Reload notices" | "Unable to load service information at the moment. Please try again later." plus a Try again button |
-| Empty | Temporarily set `NOTICE_COUNT` handling by returning `[]` from `fetchServiceData` | "No service notices have been published yet." |
+The page status messages cover loading, success, empty results and server errors.
+The JavaScript modules use regular functions for callbacks and data processing;
+PHP backend files use named functions, class methods and standard closures, not
+PHP arrow functions.
 
 ---
 
-## Deployment (Netlify, no credit card, works from a laptop)
+## Stage 4 — PHP and MySQL persistence
 
-1. Push the repository to GitHub.
-2. Sign in to netlify.com with the GitHub account.
-3. **Add new site → Import an existing project → GitHub →** pick the repository.
-4. Build command: `npm run build`. Publish directory: `dist`. Deploy.
-5. Copy the generated URL into the README (section 11). Every later push redeploys.
+The PHP API separates HTTP handling (`api/lib/Http.php`), PDO setup
+(`api/lib/Database.php`), SQL repositories (`api/lib/*Repository.php`) and route
+handlers (`api/*.php`). `database/schema.sql` creates and seeds services,
+announcements, contact information and submitted requests. The frontend reads
+the database-backed content and saves request submissions through the API.
 
-GitHub Pages alternative:
+### Local setup
 
-```bash
-npm run build
-npx gh-pages -d dist        # after: npm install --save-dev gh-pages
-```
+1. Copy `.env.example` to `.env` and `.env.admin.example` to `.env.admin`.
+   Set an app password in `.env` and administrator connection in `.env.admin`.
+2. Run `php database\initialize.php` to create and seed the database and grant
+   the app account limited access. Keep both files out of version control; the
+   admin file can be removed after initialization.
+3. Run `php -S 127.0.0.1:8000` and `npm run dev` in separate terminals.
+4. Open `http://localhost:5173/`.
 
-Then in the repository: **Settings → Pages → Branch: `gh-pages` → /(root)**.
-`vite.config.js` already sets `base: './'`, which is what makes a project-page URL work.
+Static-only hosting instructions from the earlier stages do not apply to the
+backend version. Deployment requires a PHP-capable web server and MySQL/MariaDB.
+
+---
+
+## Deployment
+
+The backend version cannot run on static-only hosting. Deploy the Vite build,
+`api/` PHP endpoints and MySQL database together to a PHP-capable web server.
+Configure the `USRS_DB_*` runtime settings on the host; do not deploy local
+`.env` files.
 
 ---
 
@@ -176,12 +164,9 @@ Then in the repository: **Settings → Pages → Branch: `gh-pages` → /(root)*
 - [ ] Proof of no horizontal overflow at 360px
 - [ ] The media query block in `style.css`
 
-### Week 3
-- [ ] `announcements.js` open in the editor showing `async/await` and `fetch`
-- [ ] Loading state captured under Slow 3G
-- [ ] Rendered notice cards on the page
-- [ ] Error state captured while Offline
-- [ ] DevTools **Network** tab showing the request to `jsonplaceholder.typicode.com/posts`
-      with status 200 and the JSON preview
-- [ ] Console with no errors
-- [ ] Final deployed application showing the API section live
+### Backend
+- [ ] `database/schema.sql` showing the services, announcements and requests tables
+- [ ] Services and announcements returned by the PHP endpoints
+- [ ] Successful request submission showing a generated reference
+- [ ] Saved request row in MySQL
+- [ ] PHP logs and browser console without errors

@@ -1,100 +1,122 @@
-/**
- * Request form behaviour.
- *
- * Week 1 delivered the form markup. Week 3 adds the client-side behaviour:
- *  - "Request service" on a card selects that category and moves the student to the form
- *  - submitting builds a request object and shows a summary with a reference number
- *
- * Nothing is stored yet — persistence belongs to the backend weeks. Detailed
- * validation belongs to Week 4, so this only checks that required fields are filled.
- */
+import { apiRequest } from './api.js';
+import { fetchServices } from './services.js';
+import { escapeHtml } from './dom.js';
 
-import { findCategory } from './services.js';
+function collectFormValues(form) {
+  return Object.fromEntries(new FormData(form));
+}
 
-/** Reference like USRS-2026-4821, built from the year and a random block. */
-const createReference = (prefix = 'USRS') => {
-  const year = new Date().getFullYear();
-  const serial = Math.floor(1000 + Math.random() * 9000);
-  return `${prefix}-${year}-${serial}`;
-};
+function summaryTemplate(request) {
+  return `
+    <h3>Your request has been saved</h3>
+    <p>Reference: <strong>${escapeHtml(request.reference)}</strong></p>
+    <dl>
+      <dt>Student</dt><dd>${escapeHtml(request.fullName)} (${escapeHtml(request.regNumber)})</dd>
+      <dt>Email</dt><dd>${escapeHtml(request.email)}</dd>
+      <dt>Service</dt><dd>${escapeHtml(request.serviceName)}</dd>
+      <dt>Handled by</dt><dd>${escapeHtml(request.office)}</dd>
+      <dt>Subject</dt><dd>${escapeHtml(request.subject)}</dd>
+      <dt>Submitted</dt><dd>${escapeHtml(new Date(request.submittedAt).toLocaleString())}</dd>
+    </dl>
+    <p>Keep this reference for follow-up with the service desk.</p>
+  `;
+}
 
-/**
- * Collect the form values into one object.
- * Object.fromEntries + FormData keeps this working when new fields are added later.
- */
-const collectFormValues = (form) => {
-  const entries = Object.fromEntries(new FormData(form));
-  // Spread adds submission metadata without touching the collected values.
-  return { ...entries, submittedAt: new Date() };
-};
+function populateServiceOptions(select, services, selectedSlug) {
+  select.replaceChildren(new Option('Choose a service', ''));
 
-/** Return the names of required fields the student left empty (rest parameter demo). */
-const findEmptyFields = (values, ...requiredFields) =>
-  requiredFields.filter((fieldName) => !String(values[fieldName] ?? '').trim());
+  services.forEach(function (service) {
+    select.add(new Option(service.name, service.slug));
+  });
 
-const summaryTemplate = ({ fullName, regNumber, email, categoryName, office, subject, reference, submittedAt }) => `
-  <h3>Request prepared: ${reference}</h3>
-  <dl>
-    <dt>Student</dt><dd>${fullName} (${regNumber})</dd>
-    <dt>Email</dt><dd>${email}</dd>
-    <dt>Service</dt><dd>${categoryName}</dd>
-    <dt>Handled by</dt><dd>${office}</dd>
-    <dt>Subject</dt><dd>${subject}</dd>
-    <dt>Prepared</dt><dd>${submittedAt.toLocaleString()}</dd>
-  </dl>
-  <p>Quote this reference at the service desk. Saving requests to a database comes with the backend stage of this project.</p>
-`;
+  if (services.some(function (service) { return service.slug === selectedSlug; })) {
+    select.value = selectedSlug;
+  }
+}
 
 export function initRequestForm() {
   const form = document.querySelector('#requestForm');
   const feedback = document.querySelector('#formFeedback');
   const categorySelect = document.querySelector('#serviceCategory');
+  const categoryHint = document.querySelector('#serviceCategoryHint');
+  const description = document.querySelector('#description');
+  const descriptionCount = document.querySelector('#descriptionCount');
 
-  if (!form || !feedback || !categorySelect) return;
+  if (!form || !feedback || !categorySelect || !categoryHint) return;
 
-  const requestedService = new URLSearchParams(window.location.search).get('service');
-  if (requestedService && [...categorySelect.options].some(({ value }) => value === requestedService)) {
-    categorySelect.value = requestedService;
+  const submitButton = form.querySelector('button[type="submit"]');
+  const requiredTextFields = form.querySelectorAll('input[type="text"][required], textarea[required]');
+
+  function updateDescriptionCount() {
+    if (description && descriptionCount) {
+      descriptionCount.textContent = `${description.value.length} / ${description.maxLength} characters`;
+    }
   }
 
-  // Every "Request service" button carries its category in a data attribute.
-  const serviceButtons = [...document.querySelectorAll('[data-request-service]')];
-
-  serviceButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      const { requestService } = button.dataset; // destructuring a dataset value
-      categorySelect.value = requestService;
-      document.querySelector('#request').scrollIntoView({ behavior: 'smooth' });
-      document.querySelector('#subject').focus({ preventScroll: true });
+  description.addEventListener('input', updateDescriptionCount);
+  requiredTextFields.forEach(function (field) {
+    field.addEventListener('input', function () {
+      field.setCustomValidity('');
     });
   });
+  updateDescriptionCount();
 
-  form.addEventListener('submit', (event) => {
+  categorySelect.disabled = true;
+  submitButton.disabled = true;
+
+  fetchServices()
+    .then(function (services) {
+      const requestedService = new URLSearchParams(window.location.search).get('service');
+      populateServiceOptions(categorySelect, services, requestedService);
+      categorySelect.disabled = services.length === 0;
+      submitButton.disabled = services.length === 0;
+      categoryHint.textContent = services.length
+        ? 'Not sure? Choose “General student service”.'
+        : 'No services are available right now.';
+    })
+    .catch(function (error) {
+      console.error('Unable to load request categories:', error);
+      categoryHint.textContent = error.message;
+      feedback.textContent = 'The request form is unavailable until services can be loaded.';
+    });
+
+  form.addEventListener('submit', async function (event) {
     event.preventDefault();
 
-    const values = collectFormValues(form);
-    const missing = findEmptyFields(values, 'fullName', 'regNumber', 'email', 'serviceCategory', 'subject', 'description');
-
-    if (missing.length > 0) {
-      feedback.innerHTML = `<p>Fill in every field before sending. Still empty: ${missing.length} of 6.</p>`;
-      return;
+    for (const field of requiredTextFields) {
+      if (!field.value.trim()) {
+        field.setCustomValidity('Please enter a value that is not only spaces.');
+        field.reportValidity();
+        return;
+      }
     }
 
-    const { serviceCategory, ...rest } = values;
-    const { name: categoryName, office } = findCategory(serviceCategory);
+    const values = collectFormValues(form);
+    submitButton.disabled = true;
+    submitButton.textContent = 'Saving request...';
+    feedback.textContent = 'Saving your request...';
 
-    feedback.innerHTML = summaryTemplate({
-      ...rest,
-      categoryName,
-      office,
-      reference: createReference(),
-    });
+    try {
+      const request = await apiRequest('/api/requests.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      });
 
-    form.reset();
-    feedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      form.reset();
+      feedback.innerHTML = summaryTemplate(request);
+      feedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (error) {
+      console.error('Unable to save request:', error);
+      feedback.textContent = error.message;
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent = 'Submit request';
+    }
   });
 
-  form.addEventListener('reset', () => {
-    feedback.innerHTML = '';
+  form.addEventListener('reset', function () {
+    feedback.replaceChildren();
+    window.setTimeout(updateDescriptionCount, 0);
   });
 }

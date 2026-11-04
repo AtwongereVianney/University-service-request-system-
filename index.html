@@ -37,52 +37,14 @@
     </div>
   </header>
     <main id="main">
-      <section class="hero">
-        <div class="shell hero-grid">
-          <div class="hero-copy">
-            <p class="hero-kicker">Student service portal</p>
-            <h1>Request a university service without queuing at the office.</h1>
-            <p class="hero-lead">USRS gives students one place to discover services, send the right details and keep a record of what was asked for.</p>
-            <div class="hero-actions">
-              <a class="btn btn-primary" href="./request.html">Submit a request</a>
-              <a class="btn btn-ghost" href="./services.html">Browse services</a>
-            </div>
-            <dl class="hero-facts">
-              <div>
-                <dt>Services covered</dt>
-                <dd>9</dd>
-              </div>
-              <div>
-                <dt>Offices connected</dt>
-                <dd>6</dd>
-              </div>
-              <div>
-                <dt>Request window</dt>
-                <dd>24/7</dd>
-              </div>
-            </dl>
+      <section class="hero hero-page">
+        <div class="shell">
+          <h1>Request a university service without queuing at the office.</h1>
+          <p class="hero-lead">USRS gives students one place to discover services, send the right details and keep a record of what was asked for.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="./pages/request.html">Submit a request</a>
+            <a class="btn btn-ghost" href="./pages/services.html">Browse services</a>
           </div>
-          <aside class="hero-panel" aria-labelledby="how-it-works">
-            <h2 id="how-it-works">How a request moves</h2>
-            <ol class="steps">
-              <li>
-                <h3>You choose a service</h3>
-                <p>Pick the service that matches what you need.</p>
-              </li>
-              <li>
-                <h3>You describe the issue</h3>
-                <p>Registration number, subject and description go on one form.</p>
-              </li>
-              <li>
-                <h3>The right office receives it</h3>
-                <p>Each category maps to the office that handles it.</p>
-              </li>
-              <li>
-                <h3>You get a reference</h3>
-                <p>Every request carries a reference for follow-up.</p>
-              </li>
-            </ol>
-          </aside>
         </div>
       </section>
       <section class="section section-featured" aria-labelledby="featured-title">
@@ -91,33 +53,23 @@
             <h2 id="featured-title">Most requested this semester</h2>
             <p>Start with one of the services students ask for most often.</p>
           </div>
-          <ul class="featured-list">
-            <li>
-              <h3>Academic transcript</h3>
-              <p>Official or provisional transcript for further studies, employers or scholarships.</p>
-              <a class="btn btn-small" href="./pages/request.html?service=transcript">Request this</a>
-            </li>
-            <li>
-              <h3>Clearance</h3>
-              <p>Faculty, library, finance and hostel clearance before graduation or withdrawal.</p>
-              <a class="btn btn-small" href="./pages/request.html?service=clearance">Request this</a>
-            </li>
-            <li>
-              <h3>IT support</h3>
-              <p>Student portal access, university email, campus Wi-Fi and lab account problems.</p>
-              <a class="btn btn-small" href="./pages/request.html?service=it-support">Request this</a>
-            </li>
-          </ul>
+          <p id="featuredStatus" class="data-status" role="status" aria-live="polite">Loading services...</p>
+          <ul class="featured-list" id="featuredServices"></ul>
         </div>
       </section>
-      <section class="section section-updates"><div class="shell section-head section-head-row">
-        <div>
-          <h2>Service desk bulletin</h2>
-          <p>See the latest notices published by service offices.</p>
+      <section class="section section-updates" aria-labelledby="home-updates-title">
+        <div class="shell">
+          <div class="section-head section-head-row">
+            <div>
+              <h2 id="home-updates-title">Service desk bulletin</h2>
+              <p>See the latest notices published by service offices.</p>
+            </div>
+            <a class="btn btn-ghost btn-small" href="./pages/updates.html">View all updates</a>
+          </div>
+          <p id="homeUpdatesStatus" class="data-status" data-updates-status data-updates-grid="homeUpdatesGrid" data-count="3" role="status" aria-live="polite">Loading service information...</p>
+          <ul class="updates-grid" id="homeUpdatesGrid"></ul>
         </div>
-        <a class="btn btn-ghost btn-small" href="./pages/updates.html">View updates</a>
-      </div>
-    </section>
+      </section>
     </main>
     <footer class="site-footer">
       <div class="shell footer-grid">
