@@ -33,8 +33,10 @@
         </div>
       </section>
       <section class="section section-request" id="request" aria-labelledby="form-title">
+
         <div class="shell request-grid">
-          <form class="request-form" id="requestForm" aria-labelledby="form-title">
+
+          <form class="request-form" id="requestForm" action="../api/requests.php" method="post" aria-labelledby="form-title">
             <div class="form-heading">
               <h2 id="form-title">Your request details</h2>
               <p><span class="form-required" aria-hidden="true">*</span> Required fields</p>
@@ -87,6 +89,7 @@
             </div>
             <div class="form-feedback" id="formFeedback" role="status" aria-live="polite"></div>
           </form>
+
         </div>
       </section>
     </main>

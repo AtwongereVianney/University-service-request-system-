@@ -98,8 +98,9 @@ git checkout main && git merge week2-responsive
 The browser uses `src/js/api.js` for JSON requests to the local PHP backend.
 `services.js` loads the service catalogue for the services page, homepage and
 request form. `announcements.js` renders persisted notices on the home and
-updates pages. `requestForm.js` submits requests and displays the reference
-returned by the backend. The contact page loads its office details from MySQL.
+updates pages. The request form posts regular form data to the `action` in
+`pages/request.html`; PHP validates it, saves it, and returns an HTML confirmation
+with the reference. The contact page loads its office details from MySQL.
 `dom.js` centralizes HTML escaping for database values.
 
 The page status messages cover loading, success, empty results and server errors.

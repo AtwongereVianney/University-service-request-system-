@@ -181,15 +181,15 @@ an unknown category is received.
 
 ### Step 10: I implemented the request form workflow
 
-When the student submits the form, I prevent the browser's default page reload and
-collect the values using `FormData` and `Object.fromEntries`. I check that the
-required fields contain values. If a required field is empty, the page displays a
-message telling the student to complete the form.
+When the student submits the form, the browser sends its regular form fields to
+`api/requests.php` using the form's `action` and `method="post"`. The browser
+checks required fields, and JavaScript also prevents text fields containing only
+spaces from being submitted.
 
-If the fields are complete, the form submits them to the PHP API. The server
-validates the values, looks up the selected category and responsible office in
-MySQL, saves the request, and returns a reference number and summary. The page
-displays the saved details and resets the form.
+The PHP endpoint validates the submitted values, looks up the selected category
+and responsible office in MySQL, and saves the request. It returns an HTML
+confirmation page with the reference number and request summary, or an HTML error
+page if validation or saving fails.
 
 ### Step 11: I connected services and announcements to the database
 
@@ -303,9 +303,9 @@ The Week 3 JavaScript requirement is implemented in the application, not only sh
 |---|---|---|
 | `let` and `const` | `src/js/announcements.js`, `src/js/requestForm.js`, and the other modules | `const` holds values that are not reassigned; `toHeadline()` uses `let headline` because it replaces an overlong headline with a shortened version. |
 | Arrow functions | `src/js/announcements.js`, `src/js/requestForm.js`, `src/js/services.js` | Define data transformation functions and event handlers. |
-| Template literals | Notice and request summary renderers | Build escaped cards and the saved request summary. |
-| `async` / `await` and Fetch API | `src/js/api.js`, `src/js/requestForm.js`, `src/js/announcements.js` | Send requests to the local PHP API and handle JSON responses. |
-| PHP and MySQLi | `api/` | Validate input, run prepared queries and return JSON responses. |
+| Template literals | Notice and service renderers | Build escaped cards and service content. |
+| `async` / `await` and Fetch API | `src/js/api.js`, `src/js/announcements.js`, `src/js/services.js` | Load database-backed content from the local PHP API and handle JSON responses. |
+| PHP and MySQLi | `api/` | Validate form data, run prepared queries, save requests and return HTML confirmations. |
 | MySQL | `database/schema.sql` | Store services, announcements and student requests. |
 | Visible page output | Homepage, `pages/services.html`, `pages/updates.html`, `pages/request.html` | Render database-backed services/notices and saved request references. |
 | Loading and error handling | API-driven JavaScript modules | Show loading, empty, success and failure states. |
