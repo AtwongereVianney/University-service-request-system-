@@ -3,7 +3,7 @@
 require_once __DIR__ . '/bootstrap.php';
 
 runApi('GET', function () {
-    $database = Database::connect();
-    $announcements = (new AnnouncementRepository($database))->findPublished();
+    $database = connectToDatabase();
+    $announcements = findPublishedAnnouncements($database);
     Http::sendJson(array('data' => $announcements), 200);
 });

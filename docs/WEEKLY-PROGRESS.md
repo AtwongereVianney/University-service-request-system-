@@ -111,19 +111,17 @@ PHP arrow functions.
 
 ## Stage 4 — PHP and MySQL persistence
 
-The PHP API separates HTTP handling (`api/lib/Http.php`), PDO setup
-(`api/lib/Database.php`), SQL repositories (`api/lib/*Repository.php`) and route
-handlers (`api/*.php`). `database/schema.sql` creates and seeds services,
+The PHP API separates HTTP handling (`api/lib/Http.php`), procedural MySQLi
+setup (`api/lib/Database.php`), database functions (`api/lib/*Repository.php`)
+and route handlers (`api/*.php`). `database/schema.sql` creates and seeds services,
 announcements, contact information and submitted requests. The frontend reads
 the database-backed content and saves request submissions through the API.
 
 ### Local setup
 
-1. Copy `.env.example` to `.env` and `.env.admin.example` to `.env.admin`.
-   Set an app password in `.env` and administrator connection in `.env.admin`.
-2. Run `php database\initialize.php` to create and seed the database and grant
-   the app account limited access. Keep both files out of version control; the
-   admin file can be removed after initialization.
+1. Check the MySQL connection settings in `api/config/database.php`.
+2. The database is already created. Run `php database\initialize.php` only if
+   its tables and seed data need to be created again.
 3. Run `php -S 127.0.0.1:8000` and `npm run dev` in separate terminals.
 4. Open `http://localhost:5173/`.
 
@@ -136,8 +134,9 @@ backend version. Deployment requires a PHP-capable web server and MySQL/MariaDB.
 
 The backend version cannot run on static-only hosting. Deploy the Vite build,
 `api/` PHP endpoints and MySQL database together to a PHP-capable web server.
-Configure the `USRS_DB_*` runtime settings on the host; do not deploy local
-`.env` files.
+Set the connection values in `api/config/database.php` for the deployment.
+Do not deploy the local `root`/`root` development credentials; use a restricted
+database account and keep its credentials outside source control.
 
 ---
 

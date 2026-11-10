@@ -48,13 +48,13 @@ function validateRequestValues($payload)
 
 runApi('POST', function () {
     $values = validateRequestValues(Http::readJson());
-    $database = Database::connect();
-    $service = (new ServiceRepository($database))->findBySlug($values['serviceCategory']);
+    $database = connectToDatabase();
+    $service = findServiceBySlug($database, $values['serviceCategory']);
 
     if (!$service) {
         throw new InvalidArgumentException('Choose an available service category.');
     }
 
-    $request = (new RequestRepository($database))->create($values, $service);
+    $request = createServiceRequest($database, $values, $service);
     Http::sendJson(array('data' => $request), 201);
 });

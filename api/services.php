@@ -3,8 +3,8 @@
 require_once __DIR__ . '/bootstrap.php';
 
 runApi('GET', function () {
-    $database = Database::connect();
-    $services = (new ServiceRepository($database))->findActiveServices();
+    $database = connectToDatabase();
+    $services = findActiveServices($database);
 
     foreach ($services as &$service) {
         $service['featured'] = (bool) $service['featured'];

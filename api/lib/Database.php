@@ -1,16 +1,22 @@
 <?php
 
-class Database
+function connectToDatabase()
 {
-    public static function connect()
-    {
-        $config = databaseConfig();
-        $dsn = 'mysql:host=' . $config['host'] . ';port=' . $config['port'] . ';dbname=' . $config['name'] . ';charset=utf8mb4';
+    $config = databaseConfig();
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-        return new PDO($dsn, $config['user'], $config['password'], array(
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-        ));
+    $database = mysqli_connect(
+        $config['host'],
+        $config['user'],
+        $config['password'],
+        $config['name']
+    );
+
+    if (!$database) {
+        throw new RuntimeException('Database connection failed: ' . mysqli_connect_error());
     }
+
+    mysqli_set_charset($database, 'utf8mb4');
+
+    return $database;
 }

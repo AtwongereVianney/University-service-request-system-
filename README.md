@@ -41,13 +41,17 @@ office actually needs, in a form students can reach from a phone at any hour.
 | Styling | CSS3 — custom properties, Flexbox, CSS Grid, media queries |
 | Behaviour | Vanilla JavaScript, ES6+ modules |
 | Build tool / dev server | Vite |
-| Backend | PHP 7.4+ with PDO |
+| Backend | PHP 7.4+ with MySQLi |
 | Database | MySQL or MariaDB |
 | Package manager | npm |
 | Version control | Git and GitHub |
 
-The PHP API uses prepared PDO statements and reads database credentials from
-environment variables or a local, ignored `.env` file.
+The PHP API uses MySQLi prepared statements.
+
+The connection settings are in `api/config/database.php`: `localhost`, the
+`university_service_request_system` database, user `root` and password `root`.
+These credentials are for local development; use a restricted database account
+and keep its password out of source control in a deployed application.
 
 ## 4. Step-by-step explanation of how I built the system
 
@@ -236,7 +240,7 @@ university deployment are not included.
 > and contact information. I then added mobile-first CSS with Grid, Flexbox and
 > responsive breakpoints. After that I separated the JavaScript into ES6 modules
 > for navigation, services, the form and API notices. The frontend calls PHP
-> endpoints that use PDO and MySQL for service categories, announcements and
+> endpoints that use MySQLi and MySQL for service categories, announcements and
 > submitted requests. The server validates each submission and returns a saved
 > reference number. I tested the layout, form validation, PHP syntax and Vite
 > production build. Staff login and request administration are outside the current
@@ -288,7 +292,7 @@ university deployment are not included.
 - "Reload notices" control that fetches the latest database-backed announcements
 - Service card buttons that pre-select the category and move the student to the form
 - PHP validates and stores submitted requests; the response includes a persistent reference number
-- PDO repositories keep SQL queries separate from HTTP endpoints and validation
+- Procedural MySQLi functions keep SQL queries separate from HTTP endpoints and validation
 - Responsive navigation behaviour with `aria-expanded` kept in step
 
 ### JavaScript and backend implementation evidence
@@ -301,7 +305,7 @@ The Week 3 JavaScript requirement is implemented in the application, not only sh
 | Arrow functions | `src/js/announcements.js`, `src/js/requestForm.js`, `src/js/services.js` | Define data transformation functions and event handlers. |
 | Template literals | Notice and request summary renderers | Build escaped cards and the saved request summary. |
 | `async` / `await` and Fetch API | `src/js/api.js`, `src/js/requestForm.js`, `src/js/announcements.js` | Send requests to the local PHP API and handle JSON responses. |
-| PHP and PDO | `api/` | Validate input, run prepared queries and return JSON responses. |
+| PHP and MySQLi | `api/` | Validate input, run prepared queries and return JSON responses. |
 | MySQL | `database/schema.sql` | Store services, announcements and student requests. |
 | Visible page output | Homepage, `pages/services.html`, `pages/updates.html`, `pages/request.html` | Render database-backed services/notices and saved request references. |
 | Loading and error handling | API-driven JavaScript modules | Show loading, empty, success and failure states. |
@@ -318,8 +322,6 @@ university-service-request-system/
 ├── vite.config.js              # relative build path and development API proxy
 ├── api/                        # PHP JSON endpoints, configuration and repositories
 ├── database/                   # MySQL schema and initialization script
-├── .env.example                # local database configuration template
-├── .env.admin.example          # local schema-initialization account template
 ├── .gitignore
 ├── README.md
 ├── docs/
@@ -341,7 +343,7 @@ university-service-request-system/
 
 ## 9. Installation
 
-Requires Node.js 18 or newer, npm, PHP 7.4+ with PDO MySQL enabled, and MySQL or
+Requires Node.js 18 or newer, npm, PHP 7.4+ with MySQLi enabled, and MySQL or
 MariaDB.
 
 ```bash
@@ -352,34 +354,21 @@ npm install
 
 ## 10. Configure MySQL and run locally
 
-1. Copy both templates in PowerShell:
-
-   ```powershell
-   Copy-Item .env.example .env
-   Copy-Item .env.admin.example .env.admin
-   ```
-
-2. Edit `.env` with a strong, unique password for the `usrs_app` account. Edit
-   `.env.admin` with a local MySQL administrator account. The admin credentials
-   are used only by the initializer; the application connects as `usrs_app`.
-   Keep both files out of version control and never publish their contents.
-3. Initialize the database, seed the catalogues and notices, and grant the app
-   account only the permissions it needs:
+1. Confirm that MySQL is running and that `api/config/database.php` contains the
+   correct local connection settings.
+2. The database is already created. To create or seed its tables again, run:
 
    ```powershell
    php database\initialize.php
    ```
 
-After initialization, `.env.admin` can be removed; the running application only
-needs `.env`.
-
-4. Start the PHP API server in one terminal:
+3. Start the PHP API server in one terminal:
 
    ```powershell
    php -S 127.0.0.1:8000
    ```
 
-5. Start Vite in another terminal:
+4. Start Vite in another terminal:
 
    ```powershell
    npm run dev

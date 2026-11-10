@@ -21,7 +21,7 @@ function runApi($expectedMethod, $handler)
         $handler();
     } catch (InvalidArgumentException $error) {
         Http::sendJson(array('error' => $error->getMessage()), 422);
-    } catch (PDOException $error) {
+    } catch (mysqli_sql_exception $error) {
         error_log('USRS database error: ' . $error->getMessage());
         Http::sendJson(array('error' => 'The service is temporarily unavailable. Please try again later.'), 503);
     } catch (Throwable $error) {
